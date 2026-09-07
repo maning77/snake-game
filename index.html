@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>贪吃蛇小游戏</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="game-wrap">
+    <header class="header">
+      <h1 class="title">🐍 贪吃蛇</h1>
+    </header>
+
+    <!-- 计分面板 -->
+    <div class="hud">
+      <div class="stat">
+        <span class="stat-label">分数</span>
+        <span id="score" class="stat-value">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">最高分</span>
+        <span id="best" class="stat-value best">0</span>
+      </div>
+    </div>
+
+    <!-- 棋盘与覆盖层 -->
+    <div id="board-wrap" class="board-wrap">
+      <canvas id="board" width="400" height="400"></canvas>
+      <div id="overlay" class="overlay hidden">
+        <div class="overlay-card">
+          <p id="overlay-title" class="overlay-title">游戏暂停</p>
+          <p id="overlay-sub" class="overlay-sub"></p>
+          <div class="overlay-actions">
+            <button id="resume-btn" class="btn btn-ghost">继续游戏</button>
+            <button id="restart-btn" class="btn btn-primary">重新开始</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p id="keyboard-hint" class="hint">方向键 / WASD 移动 · 空格或 P 暂停</p>
+
+    <!-- 移动端触控区 -->
+    <div class="touch-area">
+      <div class="dpad">
+        <div class="dpad-btn dpad-up" data-dir="0,-1" aria-label="上">▲</div>
+        <div class="dpad-btn dpad-left" data-dir="-1,0" aria-label="左">◀</div>
+        <button id="pause-btn" class="dpad-btn dpad-pause" aria-label="暂停">⏸</button>
+        <div class="dpad-btn dpad-right" data-dir="1,0" aria-label="右">▶</div>
+        <div class="dpad-btn dpad-down" data-dir="0,1" aria-label="下">▼</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+/* ============================================
+ * 贪吃蛇 v2 - 增强版样式
+ * 新增：最高分面板、覆盖层、触控方向键、响应式
+ * ============================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --bg-deep: #0b1a22;
+  --card: rgba(255, 255, 255, 0.06);
+  --line: rgba(255, 255, 255, 0.12);
+  --text: #eef6f7;
+  --text-dim: #8fb3bd;
+  --snake-head: #7bed9f;
+  --snake-body: #2ed573;
+  --apple: #ff6b6b;
+  --gold: #ffe08a;
+  --cyan: #48dbfb;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(72, 219, 251, 0.12), transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(46, 213, 115, 0.1), transparent 40%),
+    linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: var(--text);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.game-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 26px 26px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+}
+
+.header .title {
+  font-size: 28px;
+  letter-spacing: 3px;
+  text-shadow: 0 0 18px rgba(123, 237, 159, 0.35);
+}
+
+/* ---- 计分面板 ---- */
+.hud {
+  display: flex;
+  gap: 26px;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-value.best {
+  color: var(--cyan);
+}
+
+/* ---- 棋盘 ---- */
+.board-wrap {
+  position: relative;
+  width: min(400px, 88vw);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
+  touch-action: none;
+}
+
+#board {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #0d1e28;
+}
+
+/* ---- 覆盖层 ---- */
+.hidden {
+  display: none !important;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 14, 20, 0.72);
+  backdrop-filter: blur(3px);
+  transition: opacity 0.25s ease;
+  z-index: 10;
+}
+
+.overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.overlay-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 22px 26px;
+  background: rgba(11, 26, 34, 0.92);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  text-align: center;
+  min-width: 230px;
+}
+
+.overlay-title {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.overlay-sub {
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.overlay-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.btn {
+  padding: 9px 20px;
+  font-size: 14px;
+  font-family: inherit;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.2s ease;
+}
+
+.btn:active {
+  transform: scale(0.95);
+}
+
+.btn-primary {
+  color: #08231a;
+  font-weight: 600;
+  background: linear-gradient(135deg, #7bed9f, #2ed573);
+  box-shadow: 0 4px 14px rgba(46, 213, 115, 0.35);
+}
+
+.btn-ghost {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--line);
+}
+
+/* ---- 提示文案 ---- */
+.hint {
+  font-size: 12px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+/* ---- 移动端触控区 ---- */
+.touch-area {
+  display: none;
+}
+
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 58px);
+  grid-template-rows: repeat(3, 58px);
+  gap: 6px;
+}
+
+.dpad-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+  transition: background 0.12s ease, transform 0.08s ease;
+}
+
+.dpad-btn:active {
+  background: rgba(72, 219, 251, 0.35);
+  transform: scale(0.92);
+}
+
+.dpad-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.dpad-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.dpad-pause {
+  grid-column: 2;
+  grid-row: 2;
+  font-size: 15px;
+}
+
+.dpad-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.dpad-down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+/* ---- 响应式：窄屏显示触控区，隐藏键盘提示 ---- */
+@media (hover: none), (max-width: 640px) {
+  .touch-area {
+    display: block;
+  }
+  #keyboard-hint {
+    display: none;
+  }
+}
