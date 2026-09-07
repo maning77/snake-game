@@ -24,6 +24,17 @@
       </div>
     </div>
 
+    <!-- 难度与控制条 -->
+    <div class="control-bar">
+      <span class="control-label">难度</span>
+      <div class="diff-group" role="radiogroup" aria-label="难度选择">
+        <button class="diff-btn" data-diff="easy" role="radio">简单</button>
+        <button class="diff-btn active" data-diff="normal" role="radio" aria-checked="true">普通</button>
+        <button class="diff-btn" data-diff="hard" role="radio">困难</button>
+      </div>
+      <button id="mute-btn" class="icon-btn" aria-label="静音" title="静音 / 取消静音">🔊</button>
+    </div>
+
     <!-- 棋盘与覆盖层 -->
     <div id="board-wrap" class="board-wrap">
       <canvas id="board" width="400" height="400"></canvas>
@@ -39,7 +50,7 @@
       </div>
     </div>
 
-    <p id="keyboard-hint" class="hint">方向键 / WASD 移动 · 空格或 P 暂停</p>
+    <p id="keyboard-hint" class="hint">方向键 / WASD 移动 · 空格或 P 暂停 · M 静音</p>
 
     <!-- 移动端触控区 -->
     <div class="touch-area">
