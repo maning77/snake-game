@@ -10,13 +10,6 @@
  *   - 键盘处理忽略长按连发（e.repeat），修复空格/P/M 按住时的抖动误触
  *   - 新增 fillRoundRect 兼容函数，旧浏览器不支持 ctx.roundRect 时不再白屏
  *   - 详细记录见仓库根目录 维护记录.md
- *
- * v3.2（2026-09-08 第 2 次维护）：
- *   - 新增"准备开始"(idle) 态：首次打开不自动移动，按任意方向键/空格才开局；
- *     开局可指定初始朝向，蛇身自动反向铺设，任意方向首步都不会撞身
- *   - 页面/标签页隐藏(visibilitychange)时若在运行则自动暂停，避免切走后撞死
- *   - 收紧输入边界：idle/暂停/结束一律不收集方向输入；恢复/开局重置计时器
- *   - 详细记录见仓库根目录 维护记录.md
  * ============================================ */
 
 (() => {
@@ -91,18 +84,15 @@
   }
 
   // ---- 初始化蛇身 ----
-  // v3.2 维护：支持指定初始朝向 h（缺省向右）。蛇身从蛇头沿 -h 向后铺设，
-  // 使"准备开始"时按任意方向开局都不会第一步撞到自己身体。
-  function initSnake(h) {
+  function initSnake() {
     const mid = Math.floor(GRID / 2);
-    const hx = h ? h.x : 1;
-    const hy = h ? h.y : 0;
-    snake = [];
-    for (let i = 0; i < 3; i++) {
-      snake.push({ x: mid - i * hx, y: mid - i * hy });
-    }
-    dir = { x: hx, y: hy };
-    nextDir = { x: hx, y: hy };
+    snake = [
+      { x: mid - 1, y: mid },
+      { x: mid - 2, y: mid },
+      { x: mid - 3, y: mid },
+    ];
+    dir = { x: 1, y: 0 };
+    nextDir = { x: 1, y: 0 };
     score = 0;
     lastSpeedupLevel = 0;
     particles = [];
@@ -370,13 +360,6 @@
     overlayEl.classList.add("hidden");
   }
 
-  // v3.2 维护："准备开始"待命叠层——首次打开不自动开局，
-  // 需按任意方向键 / WASD / 空格，或点击"开始游戏"按钮才移动。
-  function showReady() {
-    restartBtn.textContent = "开始游戏";
-    showOverlay("🐍 准备开始", "按任意方向键 / WASD / 空格开始 · 或点击下方按钮");
-  }
-
   function gameOver(win) {
     state = "over";
     if (win) {
@@ -388,24 +371,19 @@
     }
   }
 
-  // v3.2 维护：可从 idle("准备开始") 与 over 进入；h 为该局初始朝向（缺省向右）。
-  // 开局/重开统一重置方向与计时，避免沿用上一局的遗留输入。
-  function startGame(h) {
-    initSnake(h);
+  function startGame() {
+    initSnake();
     spawnFood();
     state = "running";
-    restartBtn.textContent = "重新开始";
     hideOverlay();
     lastStep = performance.now();
   }
 
-  // v3.2 维护：silent 用于"切页自动暂停"（后台不播暂停音）。
-  // 恢复(继续)时重置 lastStep，保证不会在恢复瞬间补跑多步而撞墙。
-  function setPaused(paused, silent) {
+  function setPaused(paused) {
     if (state !== "running" && state !== "paused") return;
     if (paused) {
       state = "paused";
-      if (!silent) SFX.pause();
+      SFX.pause();
       showOverlay("⏸ 已暂停", "按空格 / P 或点击下方按钮继续", { showResume: true });
     } else {
       state = "running";
@@ -427,15 +405,8 @@
     rafId = requestAnimationFrame(loop);
   }
 
-  // v3.2 维护：非 running 状态（准备/暂停/结束）一律不收集方向输入；
-  // "准备开始"时的首次方向键/滑动即以该方向开局（startGame(d) 已铺设对应蛇身，
-  // 即使与默认朝向相反也不会首步撞身）。
   function setDirection(d) {
     if (!d) return;
-    if (state === "idle") {
-      startGame(d);
-      return;
-    }
     if (state !== "running") return;
     if (d.x === -dir.x && d.y === -dir.y) return;
     nextDir = d;
@@ -488,16 +459,13 @@
       setDirection(map[e.code]);
       return;
     }
-    // v3.2 维护：空格/P/回车 在"准备开始"与结束时开局；运行/暂停时空格/P 切换暂停；
-    // 结束态回车重开（与 v3.1 行为一致），运行中回车不干预。
-    if (e.code === "Space" || e.code === "KeyP" || e.code === "Enter") {
+    if (e.code === "Space" || e.code === "KeyP") {
       e.preventDefault();
-      if (state === "idle" || state === "over") {
-        startGame();
-      } else if ((e.code === "Space" || e.code === "KeyP") && (state === "running" || state === "paused")) {
-        togglePause();
-      }
-      return;
+      if (state === "running" || state === "paused") togglePause();
+    }
+    if ((e.code === "Enter" || e.code === "Space") && state === "over") {
+      e.preventDefault();
+      startGame();
     }
     if (e.code === "KeyM") {
       e.preventDefault();
@@ -505,18 +473,8 @@
     }
   });
 
-  // ---- v3.2 维护：页面/标签页隐藏时若正在运行则自动暂停，
-  //      避免切走后蛇继续走、回来发现已撞死 ----
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden && state === "running") {
-      setPaused(true, true);
-    }
-  });
-
   // ---- 按钮 ----
-  // v3.2 维护：startGame 现接收可选朝向参数 h，必须用包装函数避免把 click 事件
-  // 对象误当作 h 传入（否则 h.x/h.y 为 undefined，蛇身坐标变 NaN）。
-  restartBtn.addEventListener("click", () => startGame());
+  restartBtn.addEventListener("click", startGame);
   resumeBtn.addEventListener("click", () => setPaused(false));
   pauseBtn.addEventListener("click", togglePause);
   muteBtn.addEventListener("click", toggleMute);
@@ -560,11 +518,6 @@
   boardWrap.addEventListener("touchend", () => (swipeStart = null));
 
   // ---- 启动 ----
-  // v3.2 维护：首次打开进入"准备开始"(idle) 待命态，不再一打开页面蛇就自动移动；
-  // 按任意方向键 / WASD / 空格，或点击"开始游戏"后进入 running。
-  initSnake();
-  spawnFood();
-  state = "idle";
-  showReady();
+  startGame();
   rafId = requestAnimationFrame(loop);
 })();
