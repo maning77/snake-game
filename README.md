@@ -40,6 +40,7 @@ snake-game/
 ├── index.html      # 入口文件
 ├── style.css       # 样式
 ├── game.js         # 游戏逻辑
+├── 维护记录.md      # 维护 / 修复记录（含每次修改要点）
 └── README.md       # 本文件
 ```
 
@@ -67,7 +68,8 @@ python -m http.server 8080
 
 ## 📝 维护记录
 
-本仓库保留完整的迭代历史，可在 [commits/main](https://github.com/maning77/snake-game/commits/main) 查看每次提交。
+- 仓库保留完整的迭代历史，可在 [commits/main](https://github.com/maning77/snake-game/commits/main) 查看每次提交。
+- 每次维护的**审查结论与修改要点**记录在 [`维护记录.md`](./维护记录.md)。
 
 ---
 

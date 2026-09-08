@@ -5,6 +5,11 @@
  *   - 难度选择：简单 / 普通 / 困难，影响速度与提速节奏
  *   - 吃到食物时的粒子爆裂特效
  *   - 偏好（难度、是否静音）本地持久化
+ *
+ * v3.1（2026-09-08 第 1 次维护）：
+ *   - 键盘处理忽略长按连发（e.repeat），修复空格/P/M 按住时的抖动误触
+ *   - 新增 fillRoundRect 兼容函数，旧浏览器不支持 ctx.roundRect 时不再白屏
+ *   - 详细记录见仓库根目录 维护记录.md
  * ============================================ */
 
 (() => {
@@ -195,6 +200,25 @@
     },
   };
 
+  // ---- 兼容：手写圆角矩形 ----
+  // ctx.roundRect 是较新的 API（Chrome 99+ / Safari 16+），旧浏览器缺失时会抛错，
+  // 这里统一走兼容函数（v3.1 维护新增）。
+  function fillRoundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    if (typeof ctx.roundRect === "function") {
+      ctx.roundRect(x, y, w, h, r);
+      ctx.fill();
+      return;
+    }
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    ctx.fill();
+  }
+
   // ---- 绘制 ----
   function draw(ts) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -248,9 +272,7 @@
         state === "over" && i % 2 === 0
           ? "#b33939"
           : `rgb(${r}, ${g}, ${Math.round(115 - 60 * t)})`;
-      ctx.beginPath();
-      ctx.roundRect(seg.x * CELL + 1.2, seg.y * CELL + 1.2, CELL - 2.4, CELL - 2.4, 5);
-      ctx.fill();
+      fillRoundRect(seg.x * CELL + 1.2, seg.y * CELL + 1.2, CELL - 2.4, CELL - 2.4, 5);
     }
 
     // 蛇头眼睛
@@ -420,6 +442,8 @@
 
   // ---- 键盘 ----
   document.addEventListener("keydown", (e) => {
+    // v3.1 维护：忽略系统长按产生的连发事件，避免空格/P/M/回车按住时抖动误触
+    if (e.repeat) return;
     const map = {
       ArrowUp:    { x: 0, y: -1 },
       KeyW:       { x: 0, y: -1 },
