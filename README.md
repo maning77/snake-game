@@ -1,8 +1,11 @@
 # 🐍 贪吃蛇小游戏
 
-一个用 **HTML + CSS + 原生 JavaScript** 实现的经典贪吃蛇游戏，零依赖、零构建、双击 `index.html` 即可玩。
+两个版本任你玩：
 
-## ✨ 功能特性
+- **浏览器版** (`index.html` + `style.css` + `game.js`)：HTML + CSS + 原生 JS，零依赖、零构建，双击 `index.html` 即可玩
+- **C 语言版** (`snake.c`)：Windows 控制台版，使用 `conio.h` + `windows.h`，无第三方库依赖，编译后即可在命令行运行
+
+## ✨ 功能特性（两个版本共有）
 
 ### 核心玩法
 - 20×20 网格 Canvas 渲染
@@ -30,6 +33,7 @@
 | 移动 | 方向键 / WASD |
 | 暂停 / 继续 | 空格 / P |
 | 静音 / 取消静音 | M |
+| AI 自动玩切换（仅 C 版） | K |
 | 重新开始 | 结束后回车，或点击「重新开始」按钮 |
 | 移动端 | 屏幕方向键按钮 / 棋盘上下左右滑动 |
 
@@ -37,9 +41,13 @@
 
 ```
 snake-game/
-├── index.html      # 入口文件
-├── style.css       # 样式
-├── game.js         # 游戏逻辑
+├── index.html      # 入口文件（浏览器版）
+├── style.css       # 样式（浏览器版）
+├── game.js         # 游戏逻辑（浏览器版）
+├── snake.c         # C 语言版（Windows 控制台，编译生成 snake.exe）
+├── build.bat       # C 版编译脚本（gcc / cl / tcc 自动检测）
+├── run.bat         # 一键编译并运行 C 版
+├── test_snake.py   # C 版核心逻辑的 Python 回归测试（无需 gcc）
 ├── 维护记录.md      # 维护 / 修复记录（含每次修改要点）
 └── README.md       # 本文件
 ```
@@ -64,6 +72,34 @@ snake-game/
 ```bash
 python -m http.server 8080
 # 然后访问 http://localhost:8080
+```
+
+### C 语言版（Windows）
+
+需要一台装了 C 编译器的 Windows（MinGW / MSVC / TCC 任一即可）。
+
+```bat
+:: 方式一：双击 build.bat 编译，再双击 snake.exe 运行
+build.bat
+snake.exe
+
+:: 方式二：双击 run.bat 自动编译并运行
+run.bat
+
+:: 方式三：手动编译
+gcc snake.c -o snake.exe -std=c99 -O2
+snake.exe
+```
+
+C 版运行后会显示 ASCII 棋盘与中文菜单，按 `1/2/3` 选难度，回车开始。最高分、难度与静音偏好保存在同目录的 `snake_best.txt` / `snake_diff.txt` / `snake_muted.txt`。
+
+### 逻辑回归测试（无需 gcc）
+
+`test_snake.py` 用 Python 复刻了 snake.c 的核心算法（蛇移动 / 食物生成 / 撞墙 / 撞身 / AI 选方向），跑 9 个断言用例与 100 局随机模拟，在没有 C 编译器的环境下也能验证逻辑正确性：
+
+```bash
+python test_snake.py
+# 期望输出：9 通过 / 0 失败
 ```
 
 ## 📝 维护记录
